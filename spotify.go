@@ -9,12 +9,19 @@ import (
 	"time"
 
 	"github.com/0x263b/porygon2"
+	"regexp"
 )
 
 const (
 	apiEndpoint    = "https://api.spotify.com/v1/tracks/"
 	formatTemplate = "%s - %s (%s) %s - %s"
 )
+
+var patterns = []*regexp.Regexp{
+	regexp.MustCompile("spotify:track:([A-Za-z0-9]+)"),
+	regexp.MustCompile("https://play.spotify.com/track/([A-Za-z0-9]+)"),
+	regexp.MustCompile("https://open.spotify.com/track/([A-Za-z0-9]+)"),
+}
 
 type artistInfo struct{ Name string }
 
@@ -48,7 +55,18 @@ func resolveTrackInfo(trackID string) (*trackInfo, error) {
 	return &track, nil
 }
 
-func spotify(command *bot.Cmd, matches []string) (string, error) {
+func spotify(cmd *bot.PassiveCmd) (string, error) {
+	var matches []string
+	for _, pattern := range patterns {
+		if matches = pattern.FindStringSubmatch(cmd.Raw); len(matches) > 0 {
+			break
+		}
+	}
+
+	if len(matches) == 0 {
+		return "", nil
+	}
+
 	trackInfo, err := resolveTrackInfo(matches[1])
 	if err != nil {
 		return "", err
@@ -72,7 +90,5 @@ func spotify(command *bot.Cmd, matches []string) (string, error) {
 }
 
 func init() {
-	bot.RegisterCommand("^spotify spotify:track:([A-Za-z0-9]+)", spotify)
-	bot.RegisterCommand("^spotify https://play.spotify.com/track/([A-Za-z0-9]+)", spotify)
-	bot.RegisterCommand("^spotify https://open.spotify.com/track/([A-Za-z0-9]+)", spotify)
+	bot.RegisterPassiveCommand("spotify", spotify)
 }
