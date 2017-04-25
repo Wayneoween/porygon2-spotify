@@ -53,17 +53,3 @@ func TestOpenSpotifyURL(t *testing.T) {
 		t.Errorf("expected url to be %v, got %v", expected, openSpotifyURL)
 	}
 }
-
-func TestSpotify(t *testing.T) {
-	trackID := "77hmyDdKIn5JmAJmWp6264"
-
-	msg, err := spotify(nil, []string{"", trackID})
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-
-	expected := "Deerhunter - Back to the Middle (Monomania) 2m36.533s - https://open.spotify.com/track/77hmyDdKIn5JmAJmWp6264"
-	if msg != expected {
-		t.Errorf("expected url to be %v, got %v", expected, msg)
-	}
-}
