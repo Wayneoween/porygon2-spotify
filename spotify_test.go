@@ -13,6 +13,7 @@ func TestResolveTrackInfo(t *testing.T) {
 			artistInfo{Name: "Deerhunter"},
 		},
 		Album: albumInfo{Name: "Monomania"},
+		DurationMS: 156533,
 	}
 
 	trackInfo, err := resolveTrackInfo(trackID)
@@ -30,6 +31,10 @@ func TestResolveTrackInfo(t *testing.T) {
 
 	if len(trackInfo.Artists) != len(expected.Artists) {
 		t.Errorf("expected artist length to be %v, but got %v", len(expected.Artists), len(trackInfo.Artists))
+	}
+
+	if trackInfo.DurationMS != expected.DurationMS {
+		t.Errorf("expected duration to be %v, but got %v", expected.DurationMS, trackInfo.DurationMS)
 	}
 }
 
