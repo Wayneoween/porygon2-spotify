@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	apiEndpoint = "https://api.spotify.com/v1/tracks/"
+	apiEndpoint    = "https://api.spotify.com/v1/tracks/"
+	formatTemplate = "%s - %s (%s) %s - %s"
 )
 
 type artistInfo struct{ Name string }
@@ -24,23 +25,10 @@ type trackInfo struct {
 	Name         string
 	Artists      []artistInfo
 	Album        albumInfo
-	DurationMS   int
+	DurationMS   int `json:"duration_ms"`
 	ExternalURLs struct {
 		OpenSpotifyURL string `json:"spotify"`
 	} `json:"external_urls"`
-}
-
-func (track trackInfo) String() string {
-	artists := make([]string, len(track.Artists))
-
-	for i, artist := range track.Artists {
-		artists[i] = artist.Name
-	}
-
-	duration, _ := time.ParseDuration(strconv.Itoa(track.DurationMS) + "ms")
-
-	ret := fmt.Sprintf("%s - %s (%s) %s", strings.Join(artists, ", "), track.Name, track.Album.Name, duration)
-	return ret
 }
 
 func resolveTrackInfo(trackID string) (*trackInfo, error) {
@@ -60,10 +48,31 @@ func resolveTrackInfo(trackID string) (*trackInfo, error) {
 	return &track, nil
 }
 
-func spotify(command *bot.Cmd, matches []string) (msg string, err error) {
-	return strings.Join(matches, ", "), nil
+func spotify(command *bot.Cmd, matches []string) (string, error) {
+	trackInfo, err := resolveTrackInfo(matches[1])
+	if err != nil {
+		return "", err
+	}
+
+	artists := make([]string, len(trackInfo.Artists))
+	for i, artist := range trackInfo.Artists {
+		artists[i] = artist.Name
+	}
+
+	duration, _ := time.ParseDuration(strconv.Itoa(trackInfo.DurationMS) + "ms")
+
+	msg := fmt.Sprintf(formatTemplate,
+		strings.Join(artists, ", "),
+		trackInfo.Name,
+		trackInfo.Album.Name,
+		duration,
+		trackInfo.ExternalURLs.OpenSpotifyURL)
+
+	return msg, nil
 }
 
 func init() {
-	bot.RegisterCommand("^spotify ([A-Za-z0-9]+)", spotify)
+	bot.RegisterCommand("^spotify spotify:track:([A-Za-z0-9]+)", spotify)
+	bot.RegisterCommand("^spotify https://play.spotify.com/track/([A-Za-z0-9]+)", spotify)
+	bot.RegisterCommand("^spotify https://open.spotify.com/track/([A-Za-z0-9]+)", spotify)
 }
