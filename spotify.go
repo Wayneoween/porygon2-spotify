@@ -76,8 +76,8 @@ func spotify(cmd *bot.PassiveCmd) (string, error) {
 		artists[i] = artist.Name
 	}
 
-	duration := time.Duration(trackInfo.DurationMS / 1000) * time.Second
-	
+	duration := time.Duration(trackInfo.DurationMS/1000) * time.Second
+
 	msg := fmt.Sprintf(formatTemplate,
 		strings.Join(artists, ", "),
 		trackInfo.Name,
