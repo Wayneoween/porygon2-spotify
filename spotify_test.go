@@ -1,7 +1,11 @@
 package spotify
 
 import (
+	"fmt"
 	"testing"
+	"time"
+
+	"github.com/0x263b/porygon2"
 )
 
 func TestResolveTrackInfo(t *testing.T) {
@@ -51,5 +55,26 @@ func TestOpenSpotifyURL(t *testing.T) {
 
 	if openSpotifyURL != expected {
 		t.Errorf("expected url to be %v, got %v", expected, openSpotifyURL)
+	}
+}
+
+func TestSpotify(t *testing.T) {
+	cmd := bot.PassiveCmd{
+		Raw:     "lol random spotify:track:3n75gL3WU5tAwwAgssRI9j",
+		Channel: "foo",
+		Nick:    "randomdude",
+	}
+
+	duration := time.Duration(118960/1000) * time.Second
+	expected := fmt.Sprintf(formatTemplate, "Misfits", "Skulls", "Collection", duration,
+		"https://open.spotify.com/track/3n75gL3WU5tAwwAgssRI9j")
+
+	got, err := spotify(&cmd)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	if got != expected {
+		t.Errorf("expected output to be %v, got %v", expected, got)
 	}
 }
