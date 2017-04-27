@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -77,8 +76,8 @@ func spotify(cmd *bot.PassiveCmd) (string, error) {
 		artists[i] = artist.Name
 	}
 
-	duration, _ := time.ParseDuration(strconv.Itoa(trackInfo.DurationMS) + "ms")
-
+	duration := time.Duration(trackInfo.DurationMS / 1000) * time.Second
+	
 	msg := fmt.Sprintf(formatTemplate,
 		strings.Join(artists, ", "),
 		trackInfo.Name,
